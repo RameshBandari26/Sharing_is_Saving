@@ -13,4 +13,7 @@ export const mapService = {
   stops: (id) => api(`/journeys/${id}/stops`),
   pickUp: (id, uid) =>
     api(`/journeys/${id}/passengers/${uid}/pickup`, { method: "POST" }),
+  dropOff: (id, uid) =>
+    api(`/journeys/${id}/passengers/${uid}/dropoff`, { method: "POST" }),
+  complete: (id) => api(`/journeys/${id}/complete`, { method: "POST" }),
 };

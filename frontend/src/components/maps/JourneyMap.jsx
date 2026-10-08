@@ -38,8 +38,8 @@ export default function JourneyMap({ from, to, route, live, height = 350 }) {
         : [];
   return (
     <div
-      className="overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800"
-      style={{ height, maxHeight: "70vh" }}
+      className="relative overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800"
+      style={{ height, maxHeight: "70vh", isolation: "isolate", zIndex: 0 }}
     >
       <MapContainer
         center={pts[0] || [17.385, 78.4867]}

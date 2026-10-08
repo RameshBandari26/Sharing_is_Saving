@@ -21,10 +21,24 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-neutral-200/70 bg-stone-50/80 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
-        <Link to="/" className="flex items-center gap-2 text-lg font-extrabold">
-          <Route className="h-5 w-5 text-accent" />
-          SharingIsSaving
-        </Link>
+        {/* <Link to="/" className="flex items-center gap-2 text-lg font-extrabold"> */}
+          <Link
+            to="/"
+            aria-label="Sharing is Saving home"
+            className="flex items-center"
+          >
+            <img
+              src="/logo.svg"
+              alt="Sharing is Saving"
+              className="h-9 dark:hidden"
+            />
+            <img
+              src="/logo-dark.svg"
+              alt="Sharing is Saving"
+              className="hidden h-9 dark:block"
+            />
+          </Link>
+        {/* </Link> */}
         <nav className="flex items-center gap-4 sm:gap-6">
           <NavLink to="/find" className={l}>
             Find a Journey

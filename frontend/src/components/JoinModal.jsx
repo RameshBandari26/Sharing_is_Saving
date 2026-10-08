@@ -44,7 +44,7 @@ export default function JoinModal({ j, onClose, onJoined }) {
       role="dialog"
       aria-modal="true"
       aria-label="Join journey"
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center"
+      className="fixed inset-0 z-[2000] flex items-end justify-center bg-black/50 p-4 sm:items-center"
       onClick={onClose}
     >
       <div

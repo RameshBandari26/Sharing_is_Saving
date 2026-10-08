@@ -284,6 +284,42 @@ public class ShareRideService {
     notify(passengerId, "You've been picked up. Heading to your drop location.", "/track/" + id);
   }
 
+  public void dropOff(Long uid, Long id, Long passengerId) {
+    Journey j = find(id);
+    if (!j.getHostId().equals(uid))
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the host can do this");
+    if (!"STARTED".equals(j.getStatus()))
+      throw bad("Journey has not started");
+    Passenger p = passengers.findByJourneyId(id).stream().filter(x -> x.getUserId().equals(passengerId)).findFirst()
+            .orElseThrow(() -> bad("Passenger not found"));
+    if (!"PICKED_UP".equals(p.getStatus()))
+      throw bad("Passenger has not been picked up yet");
+    p.setStatus("DROPPED_OFF");
+    passengers.save(p);
+    notify(passengerId, "You've reached your drop location. Thanks for travelling together!", "/journey/" + id);
+    if (passengers.findByJourneyId(id).stream().allMatch(x -> "DROPPED_OFF".equals(x.getStatus())))
+      finish(j);
+  }
+
+  public Journey complete(Long uid, Long id) {
+    Journey j = find(id);
+    if (!j.getHostId().equals(uid))
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the host can complete this journey");
+    if (!"STARTED".equals(j.getStatus()))
+      throw bad("Journey has not started");
+    finish(j);
+    return view(j);
+  }
+
+  private void finish(Journey j) {
+    j.setStatus("COMPLETED");
+    journeys.save(j);
+    String r = j.getOrigin() + " → " + j.getDestination();
+    passengers.findByJourneyId(j.getId())
+            .forEach(p -> notify(p.getUserId(), "Journey completed: " + r + ".", "/journey/" + j.getId()));
+    notify(j.getHostId(), "Journey completed: " + r + ".", "/journey/" + j.getId());
+  }
+
   // ---- messages ----
   @Transactional(readOnly = true)
   public List<ConvView> conversations(Long uid) {

@@ -26,7 +26,7 @@ export default function Track() {
     (isHost || j.passengers.some((x) => x.userId === user.id))
   );
 
-  // poll host location + stops every 5s
+  // poll host location, journey status and stops every 5s
   useEffect(() => {
     if (!member) return;
     let off = false;
@@ -51,9 +51,9 @@ export default function Track() {
     };
   }, [member, id]);
 
-  // host shares GPS
+  // host shares GPS while the journey is running
   useEffect(() => {
-    if (!isHost || j.status !== "STARTED") return;
+    if (!isHost || j.status !== "STARTED" || status === "COMPLETED") return;
     if (!navigator.geolocation) {
       setMsg("Location is not supported in this browser");
       return;
@@ -77,7 +77,7 @@ export default function Track() {
       { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 },
     );
     return () => navigator.geolocation.clearWatch(w);
-  }, [isHost, id, j?.status]);
+  }, [isHost, id, j?.status, status]);
 
   // where are we heading next?
   const withPts = stops.filter((s) => has(s.pickup) && has(s.drop));
@@ -94,7 +94,9 @@ export default function Track() {
       label = `Drop off ${p.name}`;
     } else if (j?.toLat != null) {
       target = { lat: j.toLat, lng: j.toLng, name: j.to };
-      label = "Head to the journey destination";
+      label = withPts.length
+        ? "All passengers dropped off. Complete the journey when you arrive."
+        : "Head to the journey destination";
     }
   } else {
     const m = withPts[0];
@@ -102,10 +104,11 @@ export default function Track() {
       if (m.status === "WAITING") {
         target = m.pickup;
         label = "The host is on the way to your pickup";
-      } else {
+      } else if (m.status === "PICKED_UP") {
         target = m.drop;
         label = "On the way to your drop location";
-      }
+      } else
+        label = "You have been dropped off. Thank you for travelling together!";
     }
   }
   const origin = isHost ? me || live : live;
@@ -132,11 +135,21 @@ export default function Track() {
     };
   }, [tkey, hasOrigin]); // eslint-disable-line
 
-  const pickUp = async (uid) => {
+  const act = async (fn, okMsg) => {
     try {
-      await mapService.pickUp(id, uid);
-      notify("Passenger marked as picked up.");
+      await fn();
+      notify(okMsg);
       setStops(await mapService.stops(id));
+    } catch (e) {
+      notify(e.message, "err");
+    }
+  };
+  const finish = async () => {
+    if (!window.confirm("Mark this journey as completed?")) return;
+    try {
+      await mapService.complete(id);
+      notify("Journey completed.");
+      setStatus("COMPLETED");
     } catch (e) {
       notify(e.message, "err");
     }
@@ -158,7 +171,20 @@ export default function Track() {
         </Link>
       </div>
     );
-  if ((status || j.status) !== "STARTED")
+  const cur = status || j.status;
+  if (cur === "COMPLETED")
+    return (
+      <div className="mx-auto max-w-md px-4 py-24 text-center">
+        <h1 className="mb-2 text-2xl font-bold">Journey completed 🎉</h1>
+        <p className="mb-6 text-neutral-500">
+          Thank you for travelling together.
+        </p>
+        <Link to="/dashboard" className="btn btn-primary">
+          Back to dashboard
+        </Link>
+      </div>
+    );
+  if (cur !== "STARTED")
     return (
       <div className="mx-auto max-w-md px-4 py-24 text-center">
         <h1 className="mb-4 text-2xl font-bold">Journey hasn't started yet</h1>
@@ -198,38 +224,62 @@ export default function Track() {
         )}
       </div>
       {isHost && (
-        <div className="card divide-y divide-neutral-200 dark:divide-neutral-800">
-          {stops.map((s) => (
-            <div
-              key={s.userId}
-              className="flex items-center justify-between gap-3 p-4"
-            >
-              <div>
-                <b>{s.name}</b>
-                <div className="text-xs text-neutral-500">
-                  Pickup: {s.pickup.name || "—"}
-                  <br />
-                  Drop: {s.drop.name || "—"}
+        <>
+          <div className="card divide-y divide-neutral-200 dark:divide-neutral-800">
+            {stops.map((s) => (
+              <div
+                key={s.userId}
+                className="flex items-center justify-between gap-3 p-4"
+              >
+                <div>
+                  <b>{s.name}</b>
+                  <div className="text-xs text-neutral-500">
+                    Pickup: {s.pickup.name || "—"}
+                    <br />
+                    Drop: {s.drop.name || "—"}
+                  </div>
                 </div>
+                {s.status === "WAITING" && (
+                  <button
+                    className="btn btn-primary"
+                    onClick={() =>
+                      act(
+                        () => mapService.pickUp(id, s.userId),
+                        "Passenger marked as picked up.",
+                      )
+                    }
+                  >
+                    Picked up
+                  </button>
+                )}
+                {s.status === "PICKED_UP" && (
+                  <button
+                    className="btn btn-primary"
+                    onClick={() =>
+                      act(
+                        () => mapService.dropOff(id, s.userId),
+                        "Passenger marked as dropped off.",
+                      )
+                    }
+                  >
+                    Dropped off
+                  </button>
+                )}
+                {s.status === "DROPPED_OFF" && (
+                  <span className="pill">Dropped off ✓</span>
+                )}
               </div>
-              {s.status === "WAITING" ? (
-                <button
-                  className="btn btn-primary"
-                  onClick={() => pickUp(s.userId)}
-                >
-                  Picked up
-                </button>
-              ) : (
-                <span className="pill">Picked up</span>
-              )}
-            </div>
-          ))}
-          {!stops.length && (
-            <div className="p-4 text-sm text-neutral-500">
-              No passengers yet.
-            </div>
-          )}
-        </div>
+            ))}
+            {!stops.length && (
+              <div className="p-4 text-sm text-neutral-500">
+                No passengers yet.
+              </div>
+            )}
+          </div>
+          <button className="btn btn-ghost w-full" onClick={finish}>
+            Complete journey
+          </button>
+        </>
       )}
       {msg && (
         <p role="alert" className="text-sm text-red-600">

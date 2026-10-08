@@ -120,6 +120,9 @@ class ApiController {
     s.pickUp(uid, id, userId);
   }
 
+  @PostMapping("/journeys/{id}/passengers/{userId}/dropoff") void dropOff(@AuthenticationPrincipal Long uid,@PathVariable Long id,@PathVariable Long userId){s.dropOff(uid,id,userId);}
+  @PostMapping("/journeys/{id}/complete") Journey complete(@AuthenticationPrincipal Long uid,@PathVariable Long id){return s.complete(uid,id);}
+
   @GetMapping("/conversations")
   List<ShareRideService.ConvView> conversations(@AuthenticationPrincipal Long uid) {
     return s.conversations(uid);

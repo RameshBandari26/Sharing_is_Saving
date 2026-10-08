@@ -5,11 +5,7 @@ export default function Auth({ mode = "login" }) {
   const { login, register, notify } = useApp();
   const nav = useNavigate();
   const loc = useLocation();
-  const [f, setF] = useState({
-    name: "",
-    email: mode === "login" ? "ramesh@example.com" : "",
-    password: mode === "login" ? "password123" : "",
-  });
+  const [f, setF] = useState({ name: "", email: "", password: "" });
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const s = (k) => (e) => setF({ ...f, [k]: e.target.value });
@@ -45,6 +41,7 @@ export default function Auth({ mode = "login" }) {
             <input
               id="n"
               className="input"
+              placeholder="Enter your name"
               value={f.name}
               onChange={s("name")}
             />
@@ -56,7 +53,10 @@ export default function Auth({ mode = "login" }) {
           </label>
           <input
             id="e"
+            type="email"
             className="input"
+            placeholder="Enter your email"
+            autoComplete="email"
             value={f.email}
             onChange={s("email")}
           />
@@ -69,6 +69,10 @@ export default function Auth({ mode = "login" }) {
             id="pw"
             type="password"
             className="input"
+            placeholder="Enter your password"
+            autoComplete={
+              mode === "login" ? "current-password" : "new-password"
+            }
             value={f.password}
             onChange={s("password")}
           />
@@ -87,14 +91,14 @@ export default function Auth({ mode = "login" }) {
         </button>
         {mode === "login" ? (
           <p className="text-sm text-neutral-500">
-            Demo: ramesh@example.com / password123 ·{" "}
+            New here?{" "}
             <Link className="text-accent" to="/register">
-              Register
+              Create an account
             </Link>
           </p>
         ) : (
           <p className="text-sm text-neutral-500">
-            Demo auth only.{" "}
+            Already have an account?{" "}
             <Link className="text-accent" to="/login">
               Login
             </Link>
