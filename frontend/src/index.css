@@ -1,0 +1,10 @@
+@tailwind base;@tailwind components;@tailwind utilities;
+body{@apply bg-stone-50 text-neutral-900 antialiased dark:bg-neutral-950 dark:text-neutral-100}
+@layer components{
+.btn{@apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-50}
+.btn-primary{@apply bg-accent text-white hover:bg-accent-dark}
+.btn-ghost{@apply border border-neutral-200 hover:bg-neutral-100 dark:border-neutral-800 dark:hover:bg-neutral-900}
+.card{@apply rounded-2xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900}
+.input{@apply w-full rounded-xl border border-neutral-300 bg-white px-4 py-2.5 text-sm dark:border-neutral-700 dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-accent}
+.label{@apply mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-500}
+.pill{@apply rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-accent dark:bg-indigo-950 dark:text-indigo-300}}

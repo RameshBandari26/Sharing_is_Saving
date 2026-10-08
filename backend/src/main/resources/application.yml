@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate.ddl-auto: update
+server:
+  port: 9191
+  error:
+    include-message: always
+    include-binding-errors: always
+app:
+  cors-origin: ${CORS_ORIGIN:http://localhost:5173}
+  jwt:
+    secret: ${JWT_SECRET:change-this-dev-secret-to-at-least-32-characters-long}
+    ttl-hours: 24
+geocoding:
+  base-url: https://nominatim.openstreetmap.org
+routing:
+  base-url: https://router.project-osrm.org
