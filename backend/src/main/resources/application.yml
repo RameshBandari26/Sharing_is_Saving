@@ -11,7 +11,7 @@ server:
     include-message: never
     include-binding-errors: never
 app:
-  cors-origin: ${CORS_ORIGIN:http://localhost:5173}
+  cors-origin: ${CORS_ORIGIN:https://sharing-is-saving.vercel.app/}
   jwt:
     secret: ${JWT_SECRET:change-this-dev-secret-to-at-least-32-characters-long}
     ttl-hours: 24
